@@ -1,5 +1,4 @@
 using SimpleSDMLayers
-using StatsPlots
 using Statistics
 using RData
 using DataFrames
