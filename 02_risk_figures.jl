@@ -50,11 +50,15 @@ plot(overall_risk)
 urban = SimpleSDMPredictor(EarthEnv, LandCover, 9; bottom=-56.0)
 
 # Re-project the average LC to the risk map
-occupation = similar(risk)
-for k in keys(risk)
-    occupation[k] = urban[k]
+function coerce(template::TT, source::TS, f) where {TS <: SimpleSDMLayer, TT <: SimpleSDMLayer}
+    coerced = similar(template)
+    for k in keys(template)
+        coerced[k] = f(clip(source, k .- stride(template), k .+ stride(template)))
+    end
+    return coerced
 end
 
-plot(occupation)
+occupation = coerce(risk, urban, maximum)
 
 # Figures for landcover × risk
+plot(overall_risk, occupation; st=:bivariate)
