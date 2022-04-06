@@ -49,6 +49,17 @@ plot(overall_risk)
 # Get the land cover data
 urban = SimpleSDMPredictor(EarthEnv, LandCover, 9; bottom=-56.0)
 
+# Overkill non-zero mean function for the urban density layer
+function nonzeromean(layer)
+    v = collect(layer)
+    filter!(!iszero, v)
+    if isempty(v)
+        return 0.0
+    else
+        return mean(v)
+    end
+end
+
 # Re-project the average LC to the risk map
 function coerce(template::TT, source::TS, f) where {TS <: SimpleSDMLayer, TT <: SimpleSDMLayer}
     coerced = similar(template)
@@ -58,7 +69,7 @@ function coerce(template::TT, source::TS, f) where {TS <: SimpleSDMLayer, TT <: 
     return coerced
 end
 
-occupation = coerce(risk, urban, maximum)
+occupation = coerce(risk, urban, nonzeromean)
 
 # Figures for landcover × risk
 plot(overall_risk, occupation; st=:bivariate)
