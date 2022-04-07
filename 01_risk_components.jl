@@ -8,9 +8,6 @@ using ProgressMeter
 using GLM
 using Phylo
 
-theme(:bright)
-default(; frame=:box)
-
 # Get the data if they are not downloaded
 if !isfile(joinpath("data", "binary.csv"))
     download("https://raw.githubusercontent.com/viralemergence/Fresnel/master/BinaryWebsite.csv", joinpath("data", "binary.csv"))
@@ -32,7 +29,7 @@ for sp in hosts
     @info sp
     fname = joinpath("rasters", replace(sp, " " => "_") * ".tif")
     if !isfile(fname)
-        query = `gdal_rasterize -l "MAMMALS_TERRESTRIAL_ONLY" -a presence rangemaps/MAMMALS_TERRESTRIAL_ONLY.shp $(fname) -where "binomial LIKE '$(sp)'" -ts 1000, 500`
+        query = `gdal_rasterize -l "MAMMALS_TERRESTRIAL_ONLY" -a presence rangemaps/MAMMALS_TERRESTRIAL_ONLY.shp $(fname) -where "binomial LIKE '$(sp)'" -ts 1200, 600`
         run(query)
     end
     mp = geotiff(SimpleSDMResponse, fname)
@@ -55,7 +52,6 @@ for sp in keys(ranges)
     end
 end
 
-plot(richness)
 
 # Read the sharing matrix
 viralsharing = DataFrame(CSV.File(joinpath("data", "PredictedNetwork.csv")))
@@ -121,8 +117,6 @@ end
         end
     end
 end
-
-qs = collect(0.0:0.02:1.0)
 
 # Get the (untitled) Upham tree
 tree = open(parsenexus, joinpath("data", "upham_tree.nex"))["*UNTITLED"]
