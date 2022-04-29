@@ -130,13 +130,13 @@ savefig(joinpath("figures", "bat_richness.png"))
 # Distinctiveness
 batdist = geotiff(SimpleSDMPredictor, "biogeo/BatDistinctiveness.tif")
 virdist = geotiff(SimpleSDMPredictor, "biogeo/VirusDistinctiveness.tif")
-batdist = mask(batdist, virdist)
-virdist = mask(virdist, batdist)
+batdist = mask(virdist, batdist)
+virdist = mask(batdist, virdist)
 blendinfo = (
-    SimpleSDMLayers.bivariates.purple_yellow...,
+    SimpleSDMLayers.bivariates.blue_red...,
     blendmode=ColorBlendModes.BlendMultiply,
-    classes=6,
-    quantiles=false
+    classes=4,
+    quantiles=true
 )
 crossmap = deepcopy(plotbase)
 plot!(crossmap, batdist, virdist; st=:bivariate, blendinfo..., cbar=false)
