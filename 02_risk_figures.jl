@@ -155,12 +155,10 @@ bileg = bivariatelegend!(
 savefig(joinpath("figures", "evo_distinctiveness.png"))
 
 # Biogeo regions
-vpc1 = rescale(geotiff(SimpleSDMPredictor, "biogeo/VirusPC1.tif"), (0, 1))
-vpc2 = rescale(geotiff(SimpleSDMPredictor, "biogeo/VirusPC2.tif"), (0, 1))
-vpc1 = mask(vpc1, vpc2)
-vpc2 = mask(vpc2, vpc1)
-vpc1 = rescale(vpc1, (0, 1))
-vpc2 = rescale(vpc2, (0, 1))
+vpc1 = geotiff(SimpleSDMPredictor, "biogeo/VirusPC1.tif")
+vpc2 = geotiff(SimpleSDMPredictor, "biogeo/VirusPC2.tif")
+vpc1 = mask(vpc2, vpc1)
+vpc2 = mask(vpc1, vpc2)
 blendinfo = (
     grad1=ColorSchemes.BrBG_6,
     grad2=ColorSchemes.PiYG_6,
@@ -184,12 +182,10 @@ bileg = bivariatelegend!(
 )
 savefig(joinpath("figures", "virus_biogeo.png"))
 
-bpc1 = rescale(geotiff(SimpleSDMPredictor, "biogeo/BatPC1.tif"), (0, 1))
-bpc2 = rescale(geotiff(SimpleSDMPredictor, "biogeo/BatPC2.tif"), (0, 1))
-bpc1 = mask(bpc1, bpc2)
-bpc2 = mask(bpc2, bpc1)
-bpc1 = rescale(bpc1, (0, 1))
-bpc2 = rescale(bpc2, (0, 1))
+bpc1 = geotiff(SimpleSDMPredictor, "biogeo/BatPC1.tif")
+bpc2 = geotiff(SimpleSDMPredictor, "biogeo/BatPC2.tif")
+bpc1 = mask(bpc2, bpc1)
+bpc2 = mask(bpc1, bpc2)
 blendinfo = (
     grad1=ColorSchemes.BrBG_6,
     grad2=ColorSchemes.PiYG_6,
