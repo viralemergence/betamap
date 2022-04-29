@@ -29,7 +29,7 @@ for sp in hosts
     @info sp
     fname = joinpath("rasters", replace(sp, " " => "_") * ".tif")
     if !isfile(fname)
-        query = `gdal_rasterize -l "MAMMALS_TERRESTRIAL_ONLY" -a presence rangemaps/MAMMALS_TERRESTRIAL_ONLY.shp $(fname) -where "binomial LIKE '$(sp)'" -ts 1200, 600`
+        query = `gdal_rasterize -l "MAMMALS_TERRESTRIAL_ONLY" -a presence rangemaps/MAMMALS_TERRESTRIAL_ONLY.shp $(fname) -where "binomial LIKE '$(sp)'" -ts 1300, 650`
         run(query)
     end
     mp = geotiff(SimpleSDMResponse, fname)
@@ -51,6 +51,8 @@ for sp in keys(ranges)
         end
     end
 end
+
+geotiff("richness.tif", richness)
 
 
 # Read the sharing matrix
