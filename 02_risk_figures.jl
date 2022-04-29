@@ -6,7 +6,7 @@ using GeoJSON
 
 # Default theme
 theme(:bright)
-default(; frame=:box, dpi=600)
+default(; frame=:box, dpi=600, size=(700, 400))
 ispath("figures") || mkpath("figures")
 
 # Read the risk components stacked layer
@@ -115,14 +115,13 @@ bileg = bivariatelegend!(
     ylab="Density",
     blendinfo...
 )
-
 savefig(joinpath("figures", "risk_compounded.png"))
 
 
 # Richness map for the bats
 richness = geotiff(SimpleSDMPredictor, "richness.tif")
 crossmap = deepcopy(plotbase)
-plot!(crossmap, richness; cbar=false, c=cgrad(ColorSchemes.VanGogh3))
+plot!(crossmap, richness; cbar=false, c=cgrad(ColorSchemes.Hokusai3))
 xaxis!(crossmap, "Longitude", (-180.0, 180.0))
 yaxis!(crossmap, "Latitude", (-65.0, 90.0))
 savefig(joinpath("figures", "bat_richness.png"))
@@ -201,3 +200,7 @@ bileg = bivariatelegend!(
     blendinfo...
 )
 savefig(joinpath("figures", "bat_biogeo.png"))
+
+# Use convert to append the files
+run(`convert figures/bat_richness.png figures/evo_distinctiveness.png -append figures/combined_richness.png`)
+run(`convert figures/bat_biogeo.png figures/virus_biogeo.png -append figures/combined_biogeo.png`)
