@@ -9,6 +9,7 @@ using GLM
 using Phylo
 
 # Get the data if they are not downloaded
+ispath("data") || mkpath("data")
 if !isfile(joinpath("data", "binary.csv"))
     download("https://raw.githubusercontent.com/viralemergence/Fresnel/master/BinaryWebsite.csv", joinpath("data", "binary.csv"))
 end
