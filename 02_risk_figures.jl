@@ -1,15 +1,13 @@
 using SimpleSDMLayers
 using StatsPlots
 using Statistics
-using Colors
+using Colors, ColorSchemes, ColorBlendModes
 using GeoJSON
 
 # Default theme
 theme(:bright)
 default(; frame=:box, dpi=600)
 ispath("figures") || mkpath("figures")
-
-bv_pal = (p0=colorant"#e8e8e8", p1=colorant"#008080", p2=colorant"#fd8d1c")
 
 # Read the risk components stacked layer
 lcbd = geotiff(SimpleSDMPredictor, "risk_stack.tif", 1)
@@ -64,7 +62,9 @@ end
 overall_risk = risk * strength
 
 riskmap = deepcopy(plotbase)
-plot!(riskmap, rescale(overall_risk, (0, 1)), clim=(0, 1), c=cgrad([bv_pal.p0, bv_pal.p1]))
+
+riskgrad = SimpleSDMLayers.bivariates.blue_red.grad1
+plot!(riskmap, rescale(overall_risk, (0, 1)), clim=(0, 1), c=cgrad(riskgrad))
 xaxis!(riskmap, "Longitude", (-180.0, 180.0))
 yaxis!(riskmap, "Latitude", (-65.0, 90.0))
 savefig(joinpath("figures", "risk_map.png"))
@@ -94,9 +94,15 @@ end
 
 occupation = coerce(risk, urban, nonzeromean)
 
+blendinfo = (
+    SimpleSDMLayers.bivariates.blue_red,
+    blendmode=ColorBlendModes.BlendColorBurn,
+    classes=10
+)
+
 # Figures for landcover × risk
 crossmap = deepcopy(plotbase)
-plot!(crossmap, overall_risk, occupation; st=:bivariate, bv_pal..., classes=10, cbar=false)
+plot!(crossmap, overall_risk, occupation; st=:bivariate, blendinfo..., cbar=false)
 xaxis!(crossmap, "Longitude", (-180.0, 180.0))
 yaxis!(crossmap, "Latitude", (-65.0, 90.0))
 bileg = bivariatelegend!(
@@ -107,7 +113,96 @@ bileg = bivariatelegend!(
     background_color=colorant"#ffffff00",
     xlab="Risk",
     ylab="Density",
-    bv_pal...
+    blendinfo...
 )
 
 savefig(joinpath("figures", "risk_compounded.png"))
+
+
+# Richness map for the bats
+richness = geotiff(SimpleSDMPredictor, "richness.tif")
+crossmap = deepcopy(plotbase)
+plot!(crossmap, richness; cbar=false, c=cgrad(ColorSchemes.VanGogh3))
+xaxis!(crossmap, "Longitude", (-180.0, 180.0))
+yaxis!(crossmap, "Latitude", (-65.0, 90.0))
+savefig(joinpath("figures", "bat_richness.png"))
+
+# Distinctiveness
+batdist = geotiff(SimpleSDMPredictor, "biogeo/BatDistinctiveness.tif")
+virdist = geotiff(SimpleSDMPredictor, "biogeo/VirusDistinctiveness.tif")
+batdist = mask(batdist, virdist)
+virdist = mask(virdist, batdist)
+blendinfo = (
+    SimpleSDMLayers.bivariates.purple_yellow...,
+    blendmode=ColorBlendModes.BlendMultiply,
+    classes=6,
+    quantiles=false
+)
+crossmap = deepcopy(plotbase)
+plot!(crossmap, batdist, virdist; st=:bivariate, blendinfo..., cbar=false)
+xaxis!(crossmap, "Longitude", (-180.0, 180.0))
+yaxis!(crossmap, "Latitude", (-65.0, 90.0))
+bileg = bivariatelegend!(
+    batdist, virdist;
+    inset=(1, bbox(0.05, 0.26, 0.17, 0.17, :bottom, :left)),
+    subplot=2,
+    annotationfontsize=7,
+    background_color=colorant"#ffffff00",
+    xlab="Bats",
+    ylab="Viruses",
+    blendinfo...
+)
+savefig(joinpath("figures", "evo_distinctiveness.png"))
+
+# Biogeo regions
+vpc1 = rescale(geotiff(SimpleSDMPredictor, "biogeo/VirusPC1.tif"), (0, 1))
+vpc2 = rescale(geotiff(SimpleSDMPredictor, "biogeo/VirusPC2.tif"), (0, 1))
+vpc1 = mask(vpc1, vpc2)
+vpc2 = mask(vpc2, vpc1)
+blendinfo = (
+    grad1=ColorSchemes.BrBG_8,
+    grad2=ColorSchemes.PRGn_8,
+    blendmode=ColorBlendModes.BlendOverlay,
+    classes=8
+)
+crossmap = deepcopy(plotbase)
+bivariate!(crossmap, vpc1, vpc2; blendinfo..., cbar=false)
+xaxis!(crossmap, "Longitude", (-180.0, 180.0))
+yaxis!(crossmap, "Latitude", (-65.0, 90.0))
+bileg = bivariatelegend!(
+    vpc1, vpc2;
+    inset=(1, bbox(0.05, 0.26, 0.17, 0.17, :bottom, :left)),
+    subplot=2,
+    annotationfontsize=7,
+    background_color=colorant"#ffffff00",
+    xlab="PCoA1",
+    ylab="PCoA2",
+    blendinfo...
+)
+savefig(joinpath("figures", "virus_biogeo.png"))
+
+bpc1 = rescale(geotiff(SimpleSDMPredictor, "biogeo/BatPC1.tif"), (0, 1))
+bpc2 = rescale(geotiff(SimpleSDMPredictor, "biogeo/BatPC2.tif"), (0, 1))
+bpc1 = mask(bpc1, bpc2)
+bpc2 = mask(bpc2, bpc1)
+blendinfo = (
+    grad1=ColorSchemes.BrBG_8,
+    grad2=ColorSchemes.PRGn_8,
+    blendmode=ColorBlendModes.BlendOverlay,
+    classes=8
+)
+crossmap = deepcopy(plotbase)
+bivariate!(crossmap, bpc1, bpc2; blendinfo..., cbar=false)
+xaxis!(crossmap, "Longitude", (-180.0, 180.0))
+yaxis!(crossmap, "Latitude", (-65.0, 90.0))
+bileg = bivariatelegend!(
+    bpc1, bpc2;
+    inset=(1, bbox(0.05, 0.26, 0.17, 0.17, :bottom, :left)),
+    subplot=2,
+    annotationfontsize=7,
+    background_color=colorant"#ffffff00",
+    xlab="PCoA1",
+    ylab="PCoA2",
+    blendinfo...
+)
+savefig(joinpath("figures", "bat_biogeo.png"))
