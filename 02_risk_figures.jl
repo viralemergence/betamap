@@ -164,7 +164,7 @@ blendinfo = (
     grad2=ColorSchemes.PiYG_6,
     blendmode=ColorBlendModes.BlendSoftLight,
     classes=6,
-    quantiles=false
+    quantiles=true
 )
 crossmap = deepcopy(plotbase)
 bivariate!(crossmap, vpc1, vpc2; blendinfo..., cbar=false)
@@ -186,13 +186,6 @@ bpc1 = geotiff(SimpleSDMPredictor, "biogeo/BatPC1.tif")
 bpc2 = geotiff(SimpleSDMPredictor, "biogeo/BatPC2.tif")
 bpc1 = mask(bpc2, bpc1)
 bpc2 = mask(bpc1, bpc2)
-blendinfo = (
-    grad1=ColorSchemes.BrBG_6,
-    grad2=ColorSchemes.PiYG_6,
-    blendmode=ColorBlendModes.BlendSoftLight,
-    classes=6,
-    quantiles=false
-)
 crossmap = deepcopy(plotbase)
 bivariate!(crossmap, bpc1, bpc2; blendinfo..., cbar=false)
 xaxis!(crossmap, "Longitude", (-180.0, 180.0))
