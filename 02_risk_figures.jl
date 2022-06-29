@@ -29,6 +29,25 @@ plotbase = plot(landmass, c=colorant"#fafafabb", lc=:grey, lw=0.6)
 xaxis!(plotbase, "Longitude", (-180.0, 180.0))
 yaxis!(plotbase, "Latitude", (-65.0, 90.0))
 
+# Components of risk
+lcbdplot = deepcopy(plotbase)
+plot!(lcbdplot, lcbd, c=:viridis)
+xaxis!(lcbdplot, "Longitude", (-180.0, 180.0))
+yaxis!(lcbdplot, "Latitude", (-65.0, 90.0))
+savefig(joinpath("figures", "layer_uniqueness.png"))
+
+sharingplot = deepcopy(plotbase)
+plot!(sharingplot, sharing, c=:viridis)
+xaxis!(sharingplot, "Longitude", (-180.0, 180.0))
+yaxis!(sharingplot, "Latitude", (-65.0, 90.0))
+savefig(joinpath("figures", "layer_sharing.png"))
+
+diversityplot = deepcopy(plotbase)
+plot!(diversityplot, phydiv, c=:viridis)
+xaxis!(diversityplot, "Longitude", (-180.0, 180.0))
+yaxis!(diversityplot, "Latitude", (-65.0, 90.0))
+savefig(joinpath("figures", "layer_diversity.png"))
+
 # Trivariate risk plot
 triplot = deepcopy(plotbase)
 plot!(triplot, lcbd, phydiv, sharing; st=:trivariate)
