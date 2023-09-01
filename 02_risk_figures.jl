@@ -16,6 +16,9 @@ phydiv = geotiff(SimpleSDMPredictor, "risk_stack.tif", 2)
 sharing = geotiff(SimpleSDMPredictor, "risk_stack.tif", 3)
 
 # Get the landmass data from Natural Earth Data
+if ~isdir("data")
+    mkdir("data")
+end
 landmass_url = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_land.geojson?raw=true"
 landmass_file = joinpath("data", "land_areas.json")
 if ~isfile(landmass_file)
@@ -83,7 +86,12 @@ overall_risk = risk * strength
 
 riskmap = deepcopy(plotbase)
 
-riskgrad = SimpleSDMLayers.bivariates.blue_red.grad1
+
+p0=colorant"#e8e8e8cc"
+p1=colorant"#5ac8c8ff"
+p2=colorant"#be64acff"
+
+riskgrad = [p0, p1]
 plot!(riskmap, rescale(overall_risk, (0, 1)), clim=(0, 1), c=cgrad(riskgrad))
 xaxis!(riskmap, "Longitude", (-180.0, 180.0))
 yaxis!(riskmap, "Latitude", (-65.0, 90.0))
@@ -114,15 +122,11 @@ end
 
 occupation = coerce(risk, urban, nonzeromean)
 
-blendinfo = (
-    SimpleSDMLayers.bivariates.blue_red,
-    blendmode=ColorBlendModes.BlendColorBurn,
-    classes=10
-)
+blendinfo = (p0 = p0, p1 = p1, p2 = p2, classes=8, blendmode=ColorBlendModes.BlendColorBurn)
 
 # Figures for landcover × risk
 crossmap = deepcopy(plotbase)
-plot!(crossmap, overall_risk, occupation; st=:bivariate, blendinfo..., cbar=false)
+plot!(crossmap, overall_risk, occupation; st=:bivariate, cbar=false, blendinfo...)
 xaxis!(crossmap, "Longitude", (-180.0, 180.0))
 yaxis!(crossmap, "Latitude", (-65.0, 90.0))
 bileg = bivariatelegend!(
@@ -140,7 +144,7 @@ savefig(joinpath("figures", "risk_compounded.png"))
 # Richness map for the bats
 richness = geotiff(SimpleSDMPredictor, "richness.tif")
 crossmap = deepcopy(plotbase)
-plot!(crossmap, richness; cbar=false, c=cgrad(ColorSchemes.Hokusai3))
+plot!(crossmap, richness; cbar=true, c=cgrad(ColorSchemes.Hokusai3))
 xaxis!(crossmap, "Longitude", (-180.0, 180.0))
 yaxis!(crossmap, "Latitude", (-65.0, 90.0))
 savefig(joinpath("figures", "bat_richness.png"))
